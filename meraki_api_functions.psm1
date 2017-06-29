@@ -6,22 +6,6 @@
     A helpful module to bridge PowerShell to and wrap the Meraki API endpoints.
 
 ----------------------------------------------------------------------------- #>
-param (
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [String]
-    $api_key,
-    
-    [String]
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    $networkID,
-    
-    [String]
-    [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    $orgID,
-)
 
 <# -----------------------------------------------------------------------------
  Get-MerakiSwitches()
