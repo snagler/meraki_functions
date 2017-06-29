@@ -2,7 +2,6 @@
 
 $api_key = 'INSERT_API_KEY_HERE'
 
-### DO NOT EDIT BELOW HERE ###
 
 function Get-MerakiSwitches {
 
