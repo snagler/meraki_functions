@@ -7,7 +7,7 @@ $script:api = @{
 }
 
 function Invoke-MerakiRequest ($Uri) {
-    $script:header = @{
+    $header = @{
         "X-Cisco-Meraki-API-Key" = $MerakiApi
         "Content-Type" = 'application/json'
     }
@@ -23,12 +23,19 @@ function Get-MerakiSwitches ($NetworkID) {
 
 function Get-MerakiAPs ($NetworkID) {
 
-    $uri = $api.endpoint + "/networks/$NetworkID/devices"
-    return Invoke-MerakiRequest -Uri $uri
+    $Devices = Get-MerakiDevice -NetworkID $NetworkID
+    return $Devices | Where-Object {$_.model -match "MR*"}
 
 }
 
 function Get-MerakiAppliances ($NetworkID) {
+
+    $Devices = Get-MerakiDevice -NetworkID $NetworkID
+    return $Devices | Where-Object {$_.model -match "MX*"}
+
+}
+
+function Get-MerakiDevice ($NetworkID) {
 
     $uri = $api.endpoint + "/networks/$NetworkID/devices"
     return Invoke-MerakiRequest -Uri $uri
