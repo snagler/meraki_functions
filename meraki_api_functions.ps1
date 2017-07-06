@@ -24,14 +24,14 @@ function Get-MerakiSwitches ($NetworkID) {
 function Get-MerakiAPs ($NetworkID) {
 
     $Devices = Get-MerakiDevice -NetworkID $NetworkID
-    return $Devices | Where-Object {$_.model -match "MR*"}
+    return $Devices | Where-Object {$_.model -like "MR*"}
 
 }
 
 function Get-MerakiAppliances ($NetworkID) {
 
     $Devices = Get-MerakiDevice -NetworkID $NetworkID
-    return $Devices | Where-Object {$_.model -match "MX*"}
+    return $Devices | Where-Object {$_.model -like "MX*"}
 
 }
 
