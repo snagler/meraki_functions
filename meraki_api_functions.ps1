@@ -16,22 +16,34 @@ function Invoke-MerakiRequest ($Uri) {
 
 function Get-MerakiSwitches ($NetworkID) {
 
-    $uri = $api.endpoint + "/networks/$NetworkID/devices"
-    return Invoke-MerakiRequest -Uri $uri
+    $where = {$_.model -like "MS*"}
+    if($NetworkID){
+        return Get-MerakiDevice -NetworkID $NetworkID | Where-Object $where
+    }else{
+        return Get-MerakiDevice | Where-Object $where
+    }
 
 }
 
 function Get-MerakiAPs ($NetworkID) {
 
-    $Devices = Get-MerakiDevice -NetworkID $NetworkID
-    return $Devices | Where-Object {$_.model -like "MR*"}
+    $where = {$_.model -like "MR*"}
+    if($NetworkID){
+        return Get-MerakiDevice -NetworkID $NetworkID | Where-Object $where
+    }else{
+        return Get-MerakiDevice | Where-Object $where
+    }
 
 }
 
 function Get-MerakiAppliances ($NetworkID) {
 
-    $Devices = Get-MerakiDevice -NetworkID $NetworkID
-    return $Devices | Where-Object {$_.model -like "MX*"}
+    $where = {$_.model -like "MX*"}
+    if($NetworkID){
+        return Get-MerakiDevice -NetworkID $NetworkID | Where-Object $where
+    }else{
+        return Get-MerakiDevice | Where-Object $where
+    }
 
 }
 
@@ -45,7 +57,7 @@ function Get-MerakiDevice ($NetworkID) {
     $output = $NetworkID | ForEach-Object {
         $uri = $api.endpoint + "/networks/$_/devices"
         Invoke-MerakiRequest -Uri $uri
-    }
+    } | ForEach-Object {$_}
 
     return $output
 
