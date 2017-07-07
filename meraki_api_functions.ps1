@@ -37,8 +37,17 @@ function Get-MerakiAppliances ($NetworkID) {
 
 function Get-MerakiDevice ($NetworkID) {
 
-    $uri = $api.endpoint + "/networks/$NetworkID/devices"
-    return Invoke-MerakiRequest -Uri $uri
+    if(-not $NetworkID){
+        $OrgId = (Get-MerakiOrganizations).id
+        $NetworkID = (Get-MerakiNetworks -OrganizationID $OrgId).id
+    }
+    
+    $output = $NetworkID | ForEach-Object {
+        $uri = $api.endpoint + "/networks/$_/devices"
+        Invoke-MerakiRequest -Uri $uri
+    }
+
+    return $output
 
 }
 
