@@ -1,136 +1,88 @@
 ﻿#Insert your API key here
 
-$api_key = 'INSERT_API_KEY_HERE'
+$Global:MerakiApi = ''
 
+$script:api = @{
+    "endpoint" = 'https://dashboard.meraki.com/api/v0'
+}
 
-function Get-MerakiSwitches {
-
+function Invoke-MerakiRequest ($Uri) {
     $header = @{
-        
-        "X-Cisco-Meraki-API-Key" = $api_key
+        "X-Cisco-Meraki-API-Key" = $MerakiApi
         "Content-Type" = 'application/json'
-        
     }
+    Invoke-RestMethod -Method GET -Uri $uri -Headers $header
+}
 
-    $api = @{
+function Get-MerakiSwitches ($NetworkID) {
 
-        "endpoint" = 'https://dashboard.meraki.com/api/v0'
-    
+    $where = {$_.model -like "MS*"}
+    if($NetworkID){
+        return Get-MerakiDevice -NetworkID $NetworkID | Where-Object $where
+    }else{
+        return Get-MerakiDevice | Where-Object $where
     }
-
-    $api.url = '/networks/INSERT_NETWORK_ID/devices'
-    $uri = $api.endpoint + $api.url
-    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
-    return $request
 
 }
 
-function Get-MerakiAPs {
+function Get-MerakiAPs ($NetworkID) {
 
-    $api = @{
-
-        "endpoint" = 'https://dashboard.meraki.com/api/v0'
-    
+    $where = {$_.model -like "MR*"}
+    if($NetworkID){
+        return Get-MerakiDevice -NetworkID $NetworkID | Where-Object $where
+    }else{
+        return Get-MerakiDevice | Where-Object $where
     }
-
-    $header = @{
-        
-        "X-Cisco-Meraki-API-Key" = $api_key
-        "Content-Type" = 'application/json'
-        
-    }
-
-    $api.url = '/networks/INSERT_NETWORK_ID/devices'
-    $uri = $api.endpoint + $api.url
-    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
-    return $request
 
 }
 
-function Get-MerakiAppliances {
+function Get-MerakiAppliances ($NetworkID) {
 
-    $api = @{
-
-        "endpoint" = 'https://dashboard.meraki.com/api/v0'
-    
+    $where = {$_.model -like "MX*"}
+    if($NetworkID){
+        return Get-MerakiDevice -NetworkID $NetworkID | Where-Object $where
+    }else{
+        return Get-MerakiDevice | Where-Object $where
     }
-
-    $header = @{
-        
-        "X-Cisco-Meraki-API-Key" = $api_key
-        "Content-Type" = 'application/json'
-        
-    }
-
-    $api.url = '/networks/INSERT_NETWORK_ID/devices'
-    $uri = $api.endpoint + $api.url
-    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
-    return $request
 
 }
 
-function Get-MerakiVPN {
+function Get-MerakiDevice ($NetworkID) {
 
-    $api = @{
-
-        "endpoint" = 'https://dashboard.meraki.com/api/v0'
+    if(-not $NetworkID){
+        $OrgId = (Get-MerakiOrganizations).id
+        $NetworkID = (Get-MerakiNetworks -OrganizationID $OrgId).id
+    }
     
-    }
+    $output = $NetworkID | ForEach-Object {
+        $uri = $api.endpoint + "/networks/$_/devices"
+        Invoke-MerakiRequest -Uri $uri
+    } | ForEach-Object {$_}
 
-    $header = @{
-        
-        "X-Cisco-Meraki-API-Key" = $api_key
-        "Content-Type" = 'application/json'
-        
-    }
-
-    $api.url = '/organizations/INSERT_ORGANIZATION_ID/thirdPartyVPNPeers'
-    $uri = $api.endpoint + $api.url
-    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
-    return $request
+    return $output
 
 }
 
-function Get-MerakiNetworks {
+function Get-MerakiVPN ($OrganizationID) {
 
-    $api = @{
-
-        "endpoint" = 'https://dashboard.meraki.com/api/v0'
-    
-    }
-
-    $header = @{
-        
-        "X-Cisco-Meraki-API-Key" = $api_key
-        "Content-Type" = 'application/json'
-        
-    }
-
-    $api.url = '/organizations/INSERT_ORGANIZATION_ID/networks'
-    $uri = $api.endpoint + $api.url
-    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
-    return $request
+    $uri = $api.endpoint + "/organizations/$OrganizationID/thirdPartyVPNPeers"
+    return Invoke-MerakiRequest -Uri $uri
 
 }
 
-function Get-MerakiOrganizations {
+function Get-MerakiNetworks ($OrganizationID) {
 
-    $api = @{
+    $uri = $api.endpoint + "/organizations/$OrganizationID/networks"
+    return Invoke-MerakiRequest -Uri $uri
 
-        "endpoint" = 'https://dashboard.meraki.com/api/v0'
-    
+}
+
+function Get-MerakiOrganizations ($ApiKey) {
+
+    if($ApiKey){
+        $MerakiApi = $ApiKey
     }
-
-    $header = @{
-        
-        "X-Cisco-Meraki-API-Key" = $api_key
-        "Content-Type" = 'application/json'
-        
-    }
-
-    $api.url = '/organizations'
-    $uri = $api.endpoint + $api.url
-    $request = Invoke-RestMethod -Method GET -Uri $uri -Headers $header
-    return $request
+    $uri = $api.endpoint + '/organizations'
+    return Invoke-MerakiRequest -Uri $uri
 
 }
